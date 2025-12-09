@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Utility Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar">
+            <h2>Toolkit</h2>
+            <ul>
+                <li onclick="showTab('api-tab')" class="active-nav">API Caller</li>
+                <li onclick="showTab('js-tab')">JS Runner</li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            
+            <div id="api-tab" class="tab-content active-tab">
+                <h1>API Caller</h1>
+                <div class="input-group">
+                    <select id="api-method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                    <input type="text" id="api-url" placeholder="Enter API URL (e.g., https://jsonplaceholder.typicode.com/todos/1)">
+                    <button onclick="makeApiCall()">Send Request</button>
+                </div>
+                
+                <div class="input-group">
+                    <textarea id="api-body" placeholder="JSON Body (optional for POST/PUT)"></textarea>
+                </div>
+
+                <h3>Response:</h3>
+                <pre id="api-response">No request sent yet...</pre>
+            </div>
+
+            <div id="js-tab" class="tab-content" style="display: none;">
+                <h1>JavaScript Runner</h1>
+                <p>Write standard JS below. Use <code>console.log()</code> to see output.</p>
+                
+                <textarea id="js-code" placeholder="// Write your code here...&#10;console.log('Hello World');"></textarea>
+                <button onclick="runJsCode()">Run Code</button>
+
+                <h3>Output:</h3>
+                <div id="js-output" class="console-output"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
