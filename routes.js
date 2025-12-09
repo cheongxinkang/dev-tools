@@ -23,11 +23,31 @@ function handleEchoApi(req, res) {
     });
 }
 
-// --- 3. EXPORT ---
-// This acts like a "public interface". Only functions listed here
-// can be used by server.js.
+// --- New Protected API Function ---
+function handleProtectedApi(req, res) {
+    // 1. Read the header from the request
+    const authHeader = req.headers['authorization'];
+
+    // 2. Check if the password is correct (Simple check)
+    if (authHeader === 'Bearer secret-password-123') {
+        res.json({
+            status: "Success",
+            message: "You have accessed the secret data!",
+            secretData: [100, 200, 300]
+        });
+    } else {
+        // 3. Reject the request if wrong/missing token
+        res.status(401).json({
+            status: "Unauthorized",
+            message: "Access Denied. You need the correct token."
+        });
+    }
+}
+
+// Update exports to include the new function
 module.exports = {
     serveDashboard,
     handleTestApi,
-    handleEchoApi
+    handleEchoApi,
+    handleProtectedApi // <--- Add this
 };

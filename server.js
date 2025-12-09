@@ -15,6 +15,7 @@ app.use(express.static('public'));
 app.get('/',           myRoutes.serveDashboard);
 app.get('/api/test',   myRoutes.handleTestApi);
 app.post('/api/echo',  myRoutes.handleEchoApi);
+app.get('/api/secret',    myRoutes.handleProtectedApi);
 
 // --- STARTUP ---
 app.listen(PORT, () => {
