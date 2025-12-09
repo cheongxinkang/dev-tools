@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Utility Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar">
+            <h2>Toolkit</h2>
+            <ul>
+                <li onclick="loadModule('components/api-tab.html', this)" class="active-nav">API Caller</li>
+                <li onclick="loadModule('components/js-tab.html', this)">JS Runner</li>
+            </ul>
+        </nav>
+
+        <main id="main-content" class="content">
+            <p>Loading module...</p>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

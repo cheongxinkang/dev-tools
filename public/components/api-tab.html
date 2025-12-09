@@ -1,0 +1,20 @@
+<div class="tab-content">
+    <h1>API Caller</h1>
+    <div class="input-group">
+        <select id="api-method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+        </select>
+        <input type="text" id="api-url" placeholder="Enter API URL">
+        <button onclick="makeApiCall()">Send Request</button>
+    </div>
+    
+    <div class="input-group">
+        <textarea id="api-body" placeholder="JSON Body (optional)"></textarea>
+    </div>
+
+    <h3>Response:</h3>
+    <pre id="api-response">No request sent yet...</pre>
+</div>
