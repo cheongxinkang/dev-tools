@@ -1,17 +1,17 @@
-// --- Module Loading Logic ---
+// --- MODULE LOADING LOGIC ---
 
-// Load the default tab when the page opens
+// Global variable to store presets once we fetch them
+let cachedPresets = []; 
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Select the first list item in the sidebar
     const firstTab = document.querySelector('.sidebar li');
-    // Load that specific file
     loadModule('components/api-tab.html', firstTab);
 });
 
 async function loadModule(filePath, activeNavElement) {
     const contentContainer = document.getElementById('main-content');
     
-    // ... (Your existing UI update code) ...
+    // UI Updates
     document.querySelectorAll('.sidebar li').forEach(el => el.classList.remove('active-nav'));
     if(activeNavElement) activeNavElement.classList.add('active-nav');
 
@@ -22,12 +22,13 @@ async function loadModule(filePath, activeNavElement) {
         const html = await response.text();
         contentContainer.innerHTML = html;
 
-        // --- NEW CODE HERE ---
-        // Check if we just loaded the API tab, if so, initialize the dropdown
+        // --- SPECIFIC INIT LOGIC ---
         if (filePath.includes('api-tab.html')) {
+            // 1. Fetch the presets JSON first
+            await loadPresets(); 
+            // 2. Then populate the dropdown
             populateSavedDropdown();
         }
-        // ---------------------
         
     } catch (error) {
         contentContainer.innerHTML = `<h3>Error</h3><p>${error.message}</p>`;
@@ -121,11 +122,92 @@ function runJsCode() {
     }
 }
 
-// --- SAVED REQUESTS LOGIC ---
+// --- SAVED REQUESTS & PRESETS LOGIC ---
 
-// 1. Save the current form to LocalStorage
+// NEW: Fetch presets from the JSON file
+async function loadPresets() {
+    // If we already loaded them, don't fetch again (Caching)
+    if (cachedPresets.length > 0) return;
+
+    try {
+        const response = await fetch('presets.json'); // Fetch local file
+        cachedPresets = await response.json();        // Parse JSON
+    } catch (error) {
+        console.error("Failed to load presets:", error);
+        cachedPresets = []; // Fallback to empty if file missing
+    }
+}
+
+// Helper: Get combined list
+function getAllRequests() {
+    const localData = localStorage.getItem('my_saved_requests');
+    const savedRequests = localData ? JSON.parse(localData) : [];
+    
+    return {
+        presets: cachedPresets, // Use the variable, not the hardcoded const
+        saved: savedRequests,
+        all: [...cachedPresets, ...savedRequests]
+    };
+}
+
+// Populate Dropdown
+function populateSavedDropdown() {
+    const dropdown = document.getElementById('saved-requests-dropdown');
+    if (!dropdown) return;
+
+    dropdown.innerHTML = '<option value="">-- Load a request --</option>';
+
+    const { presets, saved } = getAllRequests();
+
+    // Group 1: Presets
+    if (presets.length > 0) {
+        const group = document.createElement('optgroup');
+        group.label = "Built-in Presets (from JSON)";
+        
+        presets.forEach((req, index) => {
+            const option = document.createElement('option');
+            option.value = index; 
+            option.text = `${req.method} - ${req.name}`;
+            group.appendChild(option);
+        });
+        dropdown.appendChild(group);
+    }
+
+    // Group 2: User Saved
+    if (saved.length > 0) {
+        const group = document.createElement('optgroup');
+        group.label = "My Saved Requests";
+        
+        saved.forEach((req, index) => {
+            const option = document.createElement('option');
+            option.value = index + presets.length; 
+            option.text = `${req.method} - ${req.name}`;
+            group.appendChild(option); 
+        });
+        dropdown.appendChild(group);
+    }
+}
+
+// Load Request (Unchanged)
+function loadRequestFromHistory() {
+    const dropdown = document.getElementById('saved-requests-dropdown');
+    const index = dropdown.value;
+
+    if (index === "") return;
+
+    const { all } = getAllRequests();
+    const selectedReq = all[index];
+
+    if (selectedReq) {
+        document.getElementById('api-method').value = selectedReq.method;
+        document.getElementById('api-url').value = selectedReq.url;
+        document.getElementById('api-auth').value = selectedReq.auth || ""; 
+        document.getElementById('api-body').value = selectedReq.body || ""; 
+    }
+}
+
+// Save Request (Unchanged)
 function saveRequest() {
-    // Get current values
     const method = document.getElementById('api-method').value;
     const url = document.getElementById('api-url').value;
     const auth = document.getElementById('api-auth').value;
@@ -133,85 +215,37 @@ function saveRequest() {
 
     if (!url) { alert("Please enter a URL first."); return; }
 
-    // Ask user for a name
-    const name = prompt("Name this request (e.g., 'Get User Profile'):");
+    const name = prompt("Name this request:");
     if (!name) return;
 
-    // Create request object
     const newRequest = { name, method, url, auth, body };
+    
+    const { saved } = getAllRequests();
+    saved.push(newRequest);
+    localStorage.setItem('my_saved_requests', JSON.stringify(saved));
 
-    // Get existing list from LocalStorage
-    const existingData = localStorage.getItem('my_saved_requests');
-    let requests = existingData ? JSON.parse(existingData) : [];
-
-    // Add new request and save back
-    requests.push(newRequest);
-    localStorage.setItem('my_saved_requests', JSON.stringify(requests));
-
-    // Refresh the dropdown UI
     populateSavedDropdown();
 }
 
-// 2. Populate the Dropdown with saved items
-function populateSavedDropdown() {
-    const dropdown = document.getElementById('saved-requests-dropdown');
-    if (!dropdown) return; // Guard clause in case we aren't on the API tab
-
-    // Clear existing options (except the first one)
-    dropdown.innerHTML = '<option value="">-- Load a saved request --</option>';
-
-    const existingData = localStorage.getItem('my_saved_requests');
-    if (existingData) {
-        const requests = JSON.parse(existingData);
-        
-        requests.forEach((req, index) => {
-            const option = document.createElement('option');
-            option.value = index; // Use the array index as the ID
-            option.text = `${req.method} - ${req.name}`;
-            dropdown.appendChild(option);
-        });
-    }
-}
-
-// 3. Load the selected request into the form
-function loadRequestFromHistory() {
-    const dropdown = document.getElementById('saved-requests-dropdown');
-    const index = dropdown.value;
-
-    if (index === "") return; // User selected the default prompt
-
-    const existingData = localStorage.getItem('my_saved_requests');
-    const requests = JSON.parse(existingData);
-    const selectedReq = requests[index];
-
-    // Fill the form fields
-    document.getElementById('api-method').value = selectedReq.method;
-    document.getElementById('api-url').value = selectedReq.url;
-    document.getElementById('api-auth').value = selectedReq.auth;
-    document.getElementById('api-body').value = selectedReq.body;
-}
-
-// 4. Delete the selected request
+// Delete Request (Unchanged)
 function deleteRequest() {
     const dropdown = document.getElementById('saved-requests-dropdown');
-    const index = dropdown.value;
+    const index = parseInt(dropdown.value);
     
-    if (index === "") { alert("Select a request to delete first."); return; }
+    if (isNaN(index)) { alert("Select a request first."); return; }
 
-    if(confirm("Are you sure you want to delete this saved request?")) {
-        const existingData = localStorage.getItem('my_saved_requests');
-        let requests = JSON.parse(existingData);
-        
-        // Remove item at specific index
-        requests.splice(index, 1);
-        
-        // Save back to storage
-        localStorage.setItem('my_saved_requests', JSON.stringify(requests));
-        
-        // Refresh UI
+    const { presets, saved } = getAllRequests();
+
+    if (index < presets.length) {
+        alert("You cannot delete built-in presets.");
+        return;
+    }
+
+    if(confirm("Delete this saved request?")) {
+        const savedIndex = index - presets.length;
+        saved.splice(savedIndex, 1);
+        localStorage.setItem('my_saved_requests', JSON.stringify(saved));
         populateSavedDropdown();
-        
-        // Clear inputs
         document.getElementById('api-url').value = "";
         document.getElementById('api-body').value = "";
     }
