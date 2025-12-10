@@ -1,5 +1,5 @@
 export async function makeApiCall() {
-    const url = document.getElementById('api-url').value;
+    const targetUrl = document.getElementById('api-url').value;
     const method = document.getElementById('api-method').value;
     const bodyContent = document.getElementById('api-body').value;
     const authHeader = document.getElementById('api-auth').value;
@@ -7,44 +7,59 @@ export async function makeApiCall() {
     const responseBody = document.getElementById('api-response');
     const statusDisplay = document.getElementById('status-display');
 
-    responseBody.innerText = "Loading...";
+    // UI Updates
+    responseBody.innerText = "Loading via Proxy...";
     statusDisplay.style.display = 'inline-block';
     statusDisplay.className = 'status-badge status-neutral'; 
-    statusDisplay.innerText = "Pending...";
+    statusDisplay.innerText = "Sending to Backend...";
 
     try {
-        const headers = { 'Content-Type': 'application/json' };
-        if (authHeader) headers['Authorization'] = authHeader;
+        // 1. Prepare the Headers for the TARGET API
+        const targetHeaders = { 'Content-Type': 'application/json' };
+        if (authHeader) targetHeaders['Authorization'] = authHeader;
 
-        let options = { method: method, headers: headers };
-
+        // 2. Prepare the Body for the TARGET API
+        let targetBody = undefined;
         if ((method === 'POST' || method === 'PUT') && bodyContent) {
-            try {
-                JSON.parse(bodyContent);
-                options.body = bodyContent;
-            } catch (e) {
-                statusDisplay.className = 'status-badge status-error';
-                statusDisplay.innerText = "Client Error";
-                responseBody.innerText = "Error: Body is not valid JSON.";
-                return;
+            // Validation check only
+            try { JSON.parse(bodyContent); } 
+            catch (e) { 
+                alert("Invalid JSON in body"); 
+                return; 
             }
+            targetBody = bodyContent;
         }
 
-        const response = await fetch(url, options);
-        const data = await response.json();
+        // 3. SEND TO OUR NODE SERVER (THE PROXY)
+        // We always use POST to talk to our proxy, regardless of the target method
+        const response = await fetch('/api/proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetUrl: targetUrl,
+                method: method,
+                headers: targetHeaders,
+                body: targetBody
+            })
+        });
 
-        if (response.ok) {
+        const result = await response.json();
+
+        // 4. Update UI with the result from the proxy
+        if (result.status >= 200 && result.status < 300) {
             statusDisplay.className = 'status-badge status-success';
         } else {
-            statusDisplay.className = 'status-badge status-error'; 
+            statusDisplay.className = 'status-badge status-error';
         }
 
-        statusDisplay.innerText = `Status: ${response.status} ${response.statusText}`;
-        responseBody.innerText = JSON.stringify(data, null, 2);
+        statusDisplay.innerText = `Status: ${result.status} ${result.statusText}`;
+        responseBody.innerText = typeof result.data === 'object' 
+            ? JSON.stringify(result.data, null, 2) 
+            : result.data;
 
     } catch (error) {
         statusDisplay.className = 'status-badge status-error';
-        statusDisplay.innerText = "Network Error";
+        statusDisplay.innerText = "Proxy Connection Failed";
         responseBody.innerText = error.message;
     }
 }

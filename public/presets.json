@@ -19,5 +19,12 @@
       "url": "http://localhost:3000/api/secret",
       "auth": "Bearer secret-password-123",
       "body": ""
+    },
+    {
+      "name": "Get Model - Structural",
+      "method": "GET",
+      "url": "https://app-qa.podium.io/api/cubs/modelruntime/v1/models/80ea0a2b-b085-4e49-b0b5-2ad211509711",
+      "auth": "",
+      "body": ""
     }
   ]

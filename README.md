@@ -16,6 +16,14 @@ Create a folder named public.
 
 Move your previous index.html, style.css, script.js and the components folder inside public.
 
+Create a .env file with
+"""
+# Server Configuration
+PORT=3000
+# Security Secrets
+API_SECRET_KEY=
+"""
+
 Step 2: Install Dependencies
 Open your terminal, navigate to your project folder, and run:
 
