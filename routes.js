@@ -47,32 +47,38 @@ function handleProtectedApi(req, res) {
 
 // --- NEW: Proxy Function ---
 async function handleProxyRequest(req, res) {
-    // 1. Unpack the "instructions" sent from the frontend
-    const { targetUrl, method, headers, body } = req.body;
+const { targetUrl, method, headers, body } = req.body;
 
     console.log(`[Proxy] Forwarding ${method} request to: ${targetUrl}`);
 
     try {
-        // 2. The Server makes the actual request to the outside world
         const response = await fetch(targetUrl, {
             method: method,
             headers: headers || {},
-            // Only attach body if it's not GET or HEAD
             body: (method !== 'GET' && method !== 'HEAD') ? body : undefined
         });
 
-        // 3. Get the response text (we use text() so we don't crash if it's not JSON)
-        const responseText = await response.text();
-        
-        // 4. Try to parse it as JSON to make it pretty, otherwise keep as string
+        // --- NEW: SAFETY PARSING LOGIC ---
+        // Get content-length header to guess size
+        const size = response.headers.get('content-length');
+        const MAX_AUTO_PARSE = 1024 * 1024; // 1MB limit for server-side parsing
+
         let responseData;
-        try {
-            responseData = JSON.parse(responseText);
-        } catch (e) {
-            responseData = responseText;
+        
+        // If it's huge, don't parse it. Just send it as a string.
+        if (size && parseInt(size) > MAX_AUTO_PARSE) {
+             console.log(`[Proxy] Response too large (${size} bytes). Skipping JSON parse.`);
+             responseData = await response.text(); // Keep as raw string
+        } else {
+            // Normal handling
+            const text = await response.text();
+            try {
+                responseData = JSON.parse(text);
+            } catch (e) {
+                responseData = text;
+            }
         }
 
-        // 5. Send the result back to your frontend
         res.json({
             status: response.status,
             statusText: response.statusText,
