@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs'); // <--- NEW
 
 // --- 1. The Dashboard Serving Function ---
 function serveDashboard(req, res) {
@@ -95,11 +96,30 @@ const { targetUrl, method, headers, body } = req.body;
     }
 }
 
+// --- NEW: List JS Files ---
+function handleListJsFiles(req, res) {
+    const directoryPath = path.join(__dirname, 'public', 'sicpjs-code');
+
+    // Read directory contents
+    fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+            console.error("Could not list files:", err);
+            return res.status(500).json({ error: "Unable to scan directory" });
+        }
+
+        // Filter to only show .js files
+        const jsFiles = files.filter(file => file.endsWith('.js'));
+        
+        res.json(jsFiles);
+    });
+}
+
 // Update Exports
 module.exports = {
     serveDashboard,
     handleTestApi,
     handleEchoApi,
     handleProtectedApi,
-    handleProxyRequest // <--- Don't forget this!
+    handleProxyRequest, // <--- Don't forget this!
+    handleListJsFiles
 };

@@ -18,6 +18,7 @@ app.get('/api/test',   myRoutes.handleTestApi);
 app.post('/api/echo',  myRoutes.handleEchoApi);
 app.get('/api/secret', myRoutes.handleProtectedApi);
 app.post('/api/proxy', myRoutes.handleProxyRequest);
+app.get('/api/js-files', myRoutes.handleListJsFiles);
 
 app.listen(PORT, () => {
     console.log(`Modular Server running at http://localhost:${PORT}`);

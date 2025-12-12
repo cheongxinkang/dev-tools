@@ -1,5 +1,14 @@
 <div class="tab-content">
-    <h1>JavaScript Runner</h1>
+    <h1>JS Textbook Runner</h1>
+    
+    <div class="input-group" style="border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px;">
+        <select id="js-saved-dropdown" onchange="loadJsFromHistory()">
+            <option value="">-- Load a standard example --</option>
+        </select>
+        <button onclick="saveJsCode()" style="background-color: #2980b9; margin-left: 5px;">Save</button>
+        <button onclick="deleteJsCode()" style="background-color: #e74c3c; margin-left: 5px;">Delete</button>
+    </div>
+
     <p>Write standard JS below. Use <code>console.log()</code> to see output.</p>
     
     <textarea id="js-code" placeholder="// Write code here..."></textarea>
