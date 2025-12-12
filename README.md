@@ -16,6 +16,41 @@ Create a folder named public.
 
 Move your previous index.html, style.css, script.js and the components folder inside public.
 
+Create a .env file with
+"""
+# Server Configuration
+PORT=3000
+# Security Secrets
+API_SECRET_KEY=
+"""
+
+Create a sample presets.json in public/
+"""
+[
+    {
+      "name": "Server Health Check",
+      "method": "GET",
+      "url": "http://localhost:3000/api/test",
+      "auth": "",
+      "body": ""
+    },
+    {
+      "name": "Echo Data (POST)",
+      "method": "POST",
+      "url": "http://localhost:3000/api/echo",
+      "auth": "",
+      "body": "{\n  \"message\": \"Hello Server!\",\n  \"id\": 123\n}"
+    },
+    {
+      "name": "Secret Area (With Token)",
+      "method": "GET",
+      "url": "http://localhost:3000/api/secret",
+      "auth": "Bearer secret-password-123",
+      "body": ""
+    }
+]
+"""
+
 Step 2: Install Dependencies
 Open your terminal, navigate to your project folder, and run:
 

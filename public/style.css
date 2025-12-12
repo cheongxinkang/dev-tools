@@ -86,3 +86,29 @@ pre, .console-output {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* Status Badge Base Style */
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 10px;
+    font-family: monospace;
+}
+
+/* Success: Green (200-299) */
+.status-success {
+    background-color: #27ae60; /* Green */
+}
+
+/* Error: Red (400-599) */
+.status-error {
+    background-color: #c0392b; /* Red */
+}
+
+/* Neutral: Grey (Loading/Default) */
+.status-neutral {
+    background-color: #7f8c8d;
+}

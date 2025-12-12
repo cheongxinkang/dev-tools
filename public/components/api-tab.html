@@ -1,5 +1,13 @@
 <div class="tab-content">
-    <h1>API Caller</h1>
+    <h1>API Caller + Auth</h1>
+    
+    <div class="input-group" style="border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px;">
+        <select id="saved-requests-dropdown" onchange="loadRequestFromHistory()">
+            <option value="">-- Load a saved request --</option>
+        </select>
+        <button onclick="deleteRequest()" style="background-color: #e74c3c;">Delete</button>
+    </div>
+
     <div class="input-group">
         <select id="api-method">
             <option value="GET">GET</option>
@@ -8,7 +16,13 @@
             <option value="DELETE">DELETE</option>
         </select>
         <input type="text" id="api-url" placeholder="Enter API URL">
-        <button onclick="makeApiCall()">Send Request</button>
+        
+        <button onclick="makeApiCall()">Send</button>
+        <button onclick="saveRequest()" style="background-color: #2980b9; margin-left: 5px;">Save</button>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="api-auth" placeholder="Authorization Header (e.g., 'Bearer my-token-123')">
     </div>
     
     <div class="input-group">
@@ -16,5 +30,6 @@
     </div>
 
     <h3>Response:</h3>
+    <div id="status-display" class="status-badge" style="display:none"></div>
     <pre id="api-response">No request sent yet...</pre>
 </div>
