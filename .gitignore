@@ -1,6 +1,9 @@
 # Dependency directories
 node_modules/
 
+# Things to keep secret
+public/presets.json
+
 # Environment variables (keeps secrets safe)
 .env
 
